@@ -34,29 +34,29 @@ public class Body extends JPanel{
 		setSize(1250, 820);
 		setLayout(new CardLayout(0, 0));
 		
-		store = new Store_Management();
-		add(store);
-		
-		sell = new Sell_Management();
-		add(sell);
-		
-		employee = new Employee_Management();
-		add(employee);
+//		store = new Store_Management();
+//		add(store);
+//		
+//		sell = new Sell_Management();
+//		add(sell);
+//		
+//		employee = new Employee_Management();
+//		add(employee);
 		
 		food = new Food_Management();
 		add(food);
 		
-		customer = new Customer_Management();
-		add(customer);
-		
-		overview = new Overview_Management();
-		add(overview);
-		
-		revenue = new Revenue_Management();
-		add(revenue);
-		
-		statistical = new Statistical_Management();
-		add(statistical);
+//		customer = new Customer_Management();
+//		add(customer);
+//		
+//		overview = new Overview_Management();
+//		add(overview);
+//		
+//		revenue = new Revenue_Management();
+//		add(revenue);
+//		
+//		statistical = new Statistical_Management();
+//		add(statistical);
 	}
 	
 	public CardLayout getCardLayout() {
