@@ -38,6 +38,7 @@ public class Food_Management extends JPanel{
 	private JLabel lb_delete;
 	private JButton bt_camera;
 	private JButton bt_save;
+	private JComboBox cb_type;
 	public Food_Management() {
 		setBackground(new Color(255, 242, 189));
 		setSize(1250, 820);
@@ -125,6 +126,7 @@ public class Food_Management extends JPanel{
 		panel.add(lb_filter);
 		
 		tf_id = new JTextField();
+		tf_id.setEnabled(false);
 		tf_id.setFont(new Font("Tahoma", Font.PLAIN, 25));
 		tf_id.setBounds(280, 103, 250, 43);
 		add(tf_id);
@@ -136,6 +138,7 @@ public class Food_Management extends JPanel{
 		add(lblTnSnPhm);
 		
 		tf_name = new JTextField();
+		tf_name.setEnabled(false);
 		tf_name.setFont(new Font("Tahoma", Font.PLAIN, 25));
 		tf_name.setColumns(10);
 		tf_name.setBounds(280, 169, 250, 43);
@@ -153,13 +156,15 @@ public class Food_Management extends JPanel{
 		add(lblnGi);
 		
 		tf_price = new JTextField();
+		tf_price.setEnabled(false);
 		tf_price.setFont(new Font("Tahoma", Font.PLAIN, 25));
 		tf_price.setColumns(10);
 		tf_price.setBounds(280, 308, 250, 43);
 		add(tf_price);
 		
-		JComboBox cb_type = new JComboBox();
-		cb_type.setForeground(new Color(98, 98, 98));
+		cb_type = new JComboBox();
+		cb_type.setEnabled(false);
+		cb_type.setForeground(new Color(54, 54, 54));
 		cb_type.setFont(new Font("Tahoma", Font.PLAIN, 25));
 		cb_type.setModel(new DefaultComboBoxModel(new String[] {"Nước"}));
 		cb_type.setBounds(280, 238, 250, 43);
@@ -212,6 +217,10 @@ public class Food_Management extends JPanel{
 			}
 			@Override
 			public void mouseClicked(MouseEvent e) {
+				tf_id.setEnabled(true);
+				tf_name.setEnabled(true);
+				cb_type.setEnabled(true);
+				tf_price.setEnabled(true);
 				bt_camera.setVisible(true);
 				bt_save.setVisible(true);
 			}
@@ -254,6 +263,10 @@ public class Food_Management extends JPanel{
 		bt_save = new JButton("Lưu");
 		bt_save.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				tf_id.setEnabled(false);
+				tf_name.setEnabled(false);
+				cb_type.setEnabled(false);
+				tf_price.setEnabled(false);
 				bt_camera.setVisible(false);
 				bt_save.setVisible(false);
 			}
