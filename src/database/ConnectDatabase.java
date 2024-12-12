@@ -19,6 +19,16 @@ public class ConnectDatabase {
 		}
 		return connection;
 	}
+	
+	public void closeConnection(Connection connection) {
+    	try {
+    		if(connection != null) {
+    			connection.close();
+    		}
+    	} catch(Exception e) {
+    		e.printStackTrace();
+    	}
+    }
 }
 
 

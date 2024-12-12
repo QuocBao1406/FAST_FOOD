@@ -13,6 +13,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+import database.Data_Food;
+import model.Model_Food;
 import view.component.Add_Food;
 
 import javax.swing.JTextField;
@@ -23,6 +25,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
@@ -39,6 +42,10 @@ public class Food_Management extends JPanel{
 	private JButton bt_camera;
 	private JButton bt_save;
 	private JComboBox cb_type;
+	private JLabel tf_image;
+	private Data_Food data_food;
+	private Model_Food model_food;
+	
 	public Food_Management() {
 		setBackground(new Color(255, 242, 189));
 		setSize(1250, 820);
@@ -170,10 +177,16 @@ public class Food_Management extends JPanel{
 		cb_type.setBounds(280, 238, 250, 43);
 		add(cb_type);
 		
+		tf_image = new JLabel("");
+		tf_image.setIcon(new ImageIcon(Food_Management.class.getResource("/images/buger_thantre.jpg")));
+		tf_image.setHorizontalAlignment(SwingConstants.CENTER);
+		tf_image.setBounds(605, 120, 210, 180);
+		add(tf_image);
+		
 		JLabel image_icon = new JLabel("");
 		image_icon.setHorizontalAlignment(SwingConstants.CENTER);
 		image_icon.setIcon(new ImageIcon(Food_Management.class.getResource("/images/icon_image.png")));
-		image_icon.setBounds(585, 100, 255, 220);
+		image_icon.setBounds(585, 100, 250, 220);
 		add(image_icon);
 		
 		lb_add = new JLabel("Thêm");
@@ -278,5 +291,11 @@ public class Food_Management extends JPanel{
 		bt_save.setBounds(899, 319, 200, 43);
 		add(bt_save);
 		bt_save.setVisible(false);
+	}
+	
+	public void loadFood() {
+		ArrayList<Model_Food> list = data_food.getInstance().loadFood();
+		
+		
 	}
 }
