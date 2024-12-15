@@ -5,8 +5,16 @@ import java.awt.Dialog;
 
 import javax.swing.JPanel;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
 import java.awt.Font;
 import javax.swing.SwingConstants;
+
+import database.Data_Food;
+import encode.En_Image;
+import model.Model_Food;
+import view.pages.Food_Management;
+
 import javax.swing.JTextField;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -14,13 +22,20 @@ import javax.swing.JButton;
 import javax.swing.ImageIcon;
 import javax.swing.JScrollPane;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.awt.event.ActionEvent;
+import javax.swing.DefaultComboBoxModel;
 
 public class Add_Food extends JPanel{
 	private JDialog dialog;
-	private JTextField textField;
-	private JTextField textField_1;
-	private JTextField textField_2;
+	private JTextField tf_name;
+	private JTextField tf_price;
+	private JTextField tf_id;
+	private JComboBox cb_type;
+	private JLabel lb_image;
+	private Data_Food data_food;
+	private byte[] image;
+	private JLabel lb_image_icon;
 	
 	public Add_Food(JDialog dialog) {
 		this.dialog = dialog;
@@ -38,64 +53,99 @@ public class Add_Food extends JPanel{
 		lblThmn.setBounds(244, 34, 409, 53);
 		add(lblThmn);
 		
-		JLabel lb_anh = new JLabel("");
-		lb_anh.setIcon(new ImageIcon(Add_Food.class.getResource("/images/icon_image.png")));
-		lb_anh.setBounds(664, 98, 250, 250);
-		add(lb_anh);
+		lb_image_icon = new JLabel("");
+		lb_image_icon.setHorizontalAlignment(SwingConstants.CENTER);
+		lb_image_icon.setBounds(679, 125, 220, 190);
+		add(lb_image_icon);
+		
+		lb_image = new JLabel("");
+		lb_image.setIcon(new ImageIcon(Add_Food.class.getResource("/images/icon_image.png")));
+		lb_image.setBounds(664, 110, 250, 220);
+		add(lb_image);
 		
 		JLabel lblTnMn = new JLabel("Tên Món Ăn");
 		lblTnMn.setForeground(new Color(128, 0, 0));
 		lblTnMn.setFont(new Font("Tahoma", Font.BOLD, 28));
-		lblTnMn.setBounds(78, 182, 165, 30);
+		lblTnMn.setBounds(78, 186, 165, 30);
 		add(lblTnMn);
 		
 		JLabel lblThLoi = new JLabel("Loại");
 		lblThLoi.setForeground(new Color(128, 0, 0));
 		lblThLoi.setFont(new Font("Tahoma", Font.BOLD, 28));
-		lblThLoi.setBounds(78, 242, 145, 30);
+		lblThLoi.setBounds(78, 250, 145, 30);
 		add(lblThLoi);
 		
-		textField = new JTextField();
-		textField.setText("");
-		textField.setFont(new Font("Tahoma", Font.BOLD, 28));
-		textField.setColumns(10);
-		textField.setBounds(259, 181, 353, 40);
-		add(textField);
+		tf_name = new JTextField();
+		tf_name.setText("");
+		tf_name.setFont(new Font("Tahoma", Font.BOLD, 28));
+		tf_name.setColumns(10);
+		tf_name.setBounds(259, 181, 353, 40);
+		add(tf_name);
 		
-		textField_1 = new JTextField();
-		textField_1.setText("");
-		textField_1.setFont(new Font("Tahoma", Font.BOLD, 28));
-		textField_1.setColumns(10);
-		textField_1.setBounds(259, 302, 353, 40);
-		add(textField_1);
+		tf_price = new JTextField();
+		tf_price.setText("0");
+		tf_price.setFont(new Font("Tahoma", Font.BOLD, 28));
+		tf_price.setColumns(10);
+		tf_price.setBounds(259, 309, 353, 40);
+		add(tf_price);
 		
-		JButton btnNewButton = new JButton("");
-		btnNewButton.setIcon(new ImageIcon(Add_Food.class.getResource("/images/camera.png")));
-		btnNewButton.addActionListener(new ActionListener() {
+		JButton bt_camera = new JButton("");
+		bt_camera.setIcon(new ImageIcon(Add_Food.class.getResource("/images/camera.png")));
+		bt_camera.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				image = En_Image.imageToBytes(dialog, lb_image_icon);
 			}
 		});
-		btnNewButton.setBounds(694, 346, 200, 35);
-		add(btnNewButton);
+		bt_camera.setBounds(694, 346, 200, 35);
+		add(bt_camera);
 		
-		JButton bt_them = new JButton("THÊM");
-		bt_them.setIcon(new ImageIcon(Add_Food.class.getResource("/images/add.png")));
-		bt_them.setFont(new Font("Tahoma", Font.BOLD, 28));
-		bt_them.setBounds(316, 378, 250, 60);
-		add(bt_them);
+		JButton bt_add = new JButton("THÊM");
+		bt_add.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				ArrayList<Model_Food> list = data_food.getInstance().loadFood();
+				for(Model_Food model_food : list) {
+					if(tf_id.getText().equals(model_food.getFood_id())) {
+						JOptionPane.showMessageDialog(null, "Mã món ăn đã tồn tại vui lòng nhập lại!");
+						return;
+					}
+				}
+				
+				String food_id = tf_id.getText();
+				String food_name = tf_name.getText();
+				String food_type = cb_type.getSelectedItem().toString();
+				int food_price = Integer.valueOf(tf_price.getText());
+				
+				if(food_id == null || food_name == null || food_price == 0) {
+					JOptionPane.showMessageDialog(null, "Vui lòng điền đầy đủ thông tin!");
+					return;
+				}
+				
+				Model_Food model_food = new Model_Food(food_id, food_name, food_type, food_price, image);
+				
+				Data_Food.getInstance().addFood(model_food);
+				Food_Management.addFood(model_food);
+				Food_Management.loadFood();
+				
+				dialog.dispose();
+			}
+		});
+		bt_add.setIcon(new ImageIcon(Add_Food.class.getResource("/images/add.png")));
+		bt_add.setFont(new Font("Tahoma", Font.BOLD, 28));
+		bt_add.setBounds(316, 378, 250, 60);
+		add(bt_add);
 		
 		JLabel lblnGi = new JLabel("Đơn giá");
 		lblnGi.setForeground(new Color(128, 0, 0));
 		lblnGi.setFont(new Font("Tahoma", Font.BOLD, 28));
-		lblnGi.setBounds(78, 302, 145, 30);
+		lblnGi.setBounds(78, 314, 145, 30);
 		add(lblnGi);
 		
-		textField_2 = new JTextField();
-		textField_2.setText("");
-		textField_2.setFont(new Font("Tahoma", Font.BOLD, 28));
-		textField_2.setColumns(10);
-		textField_2.setBounds(259, 117, 353, 40);
-		add(textField_2);
+		tf_id = new JTextField();
+		tf_id.setText("");
+		tf_id.setFont(new Font("Tahoma", Font.BOLD, 28));
+		tf_id.setColumns(10);
+		tf_id.setBounds(259, 117, 353, 40);
+		add(tf_id);
 		
 		JLabel lblMMn = new JLabel("Mã Món Ăn");
 		lblMMn.setForeground(new Color(128, 0, 0));
@@ -103,8 +153,13 @@ public class Add_Food extends JPanel{
 		lblMMn.setBounds(78, 122, 165, 30);
 		add(lblMMn);
 		
-		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(259, 242, 353, 40);
-		add(scrollPane);
+		cb_type = new JComboBox();
+		cb_type.setForeground(new Color(39, 39, 39));
+		cb_type.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		cb_type.setModel(new DefaultComboBoxModel(new String[] {"Burger"}));
+		cb_type.setBounds(259, 245, 353, 40);
+		add(cb_type);
+		
+		
 	}
 }

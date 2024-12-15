@@ -7,6 +7,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import net.miginfocom.swing.MigLayout;
+import java.awt.Toolkit;
 
 public class Main extends JFrame {
 
@@ -15,9 +16,6 @@ public class Main extends JFrame {
 	private SideBar sidebar;
 	private Body body;
 
-	/**
-	 * Launch the application.
-	 */
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -31,10 +29,9 @@ public class Main extends JFrame {
 		});
 	}
 
-	/**
-	 * Create the frame.
-	 */
 	public Main() {
+		setIconImage(Toolkit.getDefaultToolkit().getImage(Main.class.getResource("/images/logo.png")));
+		setTitle("BHNM FAST FOOD");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(-6, 0, 1550, 823);
 		contentPane = new JPanel();

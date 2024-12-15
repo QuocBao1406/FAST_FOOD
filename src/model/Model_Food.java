@@ -5,9 +5,9 @@ public class Model_Food {
 	private String food_name;
 	private String food_type;
 	private int food_price;
-	private String food_image;
+	private byte[] food_image;
 	
-	public Model_Food(String food_id, String food_name, String food_type, int food_price, String food_image) {
+	public Model_Food(String food_id, String food_name, String food_type, int food_price, byte[] food_image) {
 		this.food_id = food_id;
 		this.food_name = food_name;
 		this.food_type = food_type;
@@ -47,11 +47,11 @@ public class Model_Food {
 		this.food_price = food_price;
 	}
 
-	public String getFood_image() {
+	public byte[] getFood_image() {
 		return food_image;
 	}
 
-	public void setFood_image(String food_image) {
+	public void setFood_image(byte[] food_image) {
 		this.food_image = food_image;
 	}
 	

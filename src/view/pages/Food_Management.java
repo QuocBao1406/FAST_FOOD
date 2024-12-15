@@ -1,10 +1,12 @@
 package view.pages;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import java.awt.Font;
 import java.awt.GridLayout;
@@ -14,17 +16,27 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 import database.Data_Food;
+import encode.En_Image;
+import encode.ImageUtil;
 import model.Model_Food;
+import swing.PlaceholderTextField;
 import view.component.Add_Food;
 
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.ArrayList;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -42,9 +54,13 @@ public class Food_Management extends JPanel{
 	private JButton bt_camera;
 	private JButton bt_save;
 	private JComboBox cb_type;
-	private JLabel tf_image;
-	private Data_Food data_food;
+	private static JLabel lb_image;
+	private static Data_Food data_food;
 	private Model_Food model_food;
+	private JComboBox cb_find_type;
+	private static DefaultTableModel table_model;
+	private byte[] image;
+	private JLabel image_icon;
 	
 	public Food_Management() {
 		setBackground(new Color(255, 242, 189));
@@ -60,14 +76,17 @@ public class Food_Management extends JPanel{
 		scrollPane.setBounds(40, 460, 1170, 320);
 		add(scrollPane);
 		
-		table = new JTable();
-		table.setModel(new DefaultTableModel(
+		table_model = new DefaultTableModel(
 			new Object[][] {
 			},
 			new String[] {
 				"M\u00E3 S\u1EA3n Ph\u1EA9m", "T\u00EAn S\u1EA3n Ph\u1EA9m", "Lo\u1EA1i S\u1EA3n Ph\u1EA9m", "\u0110\u01A1n Gi\u00E1"
 			}
-		));
+		);
+		loadFood();
+		table = new JTable();
+		table.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		table.setModel(table_model);
 		table.getColumnModel().getColumn(0).setPreferredWidth(200);
 		table.getColumnModel().getColumn(1).setPreferredWidth(500);
 		table.getColumnModel().getColumn(2).setPreferredWidth(250);
@@ -77,8 +96,26 @@ public class Food_Management extends JPanel{
 		table.getTableHeader().setPreferredSize(new Dimension(table.getTableHeader().getWidth(), 30));
 		table.getTableHeader().setFont(headerFont);
 		table.setRowHeight(30);
-		
-		table.setEnabled(false);
+		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            private String tf_select;
+
+			@Override
+            public void valueChanged(ListSelectionEvent e) {
+                if (!e.getValueIsAdjusting()) {
+                    int selectedRow = table.getSelectedRow();
+                    if (selectedRow != -1) {
+                        tf_id.setText(table.getValueAt(selectedRow, 0).toString());
+                        tf_name.setText(table.getValueAt(selectedRow, 1).toString());
+                        cb_type.setSelectedItem(table.getValueAt(selectedRow, 2).toString());
+                        tf_price.setText(table.getValueAt(selectedRow, 3).toString());
+                        En_Image.bytesToImageLabel(Data_Food.getInstance().getImage(table.getValueAt(selectedRow, 0).toString()), lb_image);
+                        
+                        tf_select = table.getValueAt(selectedRow, 0).toString();
+                    }
+                }
+            }
+        });
 		scrollPane.setViewportView(table);
 		
 		JLabel lblNewLabel = new JLabel("Mã Món Ăn");
@@ -97,9 +134,20 @@ public class Food_Management extends JPanel{
 		lblNewLabel_2.setBounds(50, 10, 185, 50);
 		panel.add(lblNewLabel_2);
 		
-		tf_find_name = new JTextField();
+		tf_find_name = new PlaceholderTextField("Nhập tên món ăn...");
 		tf_find_name.setFont(new Font("Tahoma", Font.PLAIN, 20));
 		tf_find_name.setBounds(245, 21, 200, 30);
+		tf_find_name.getDocument().addDocumentListener(new DocumentListener() {
+            public void insertUpdate(DocumentEvent e) {
+                searchFood();
+            }
+            public void removeUpdate(DocumentEvent e) {
+            	searchFood();
+            }
+            public void changedUpdate(DocumentEvent e) {
+            	searchFood();
+            }
+        });
 		panel.add(tf_find_name);
 		tf_find_name.setColumns(10);
 		
@@ -108,7 +156,8 @@ public class Food_Management extends JPanel{
 		lblNewLabel_2_1.setBounds(476, 10, 185, 50);
 		panel.add(lblNewLabel_2_1);
 		
-		JComboBox cb_find_type = new JComboBox();
+		cb_find_type = new JComboBox();
+		cb_find_type.setModel(new DefaultComboBoxModel(new String[] {"Tất cả", "Burger", "Pizza"}));
 		cb_find_type.setFont(new Font("Tahoma", Font.PLAIN, 20));
 		cb_find_type.setBounds(671, 20, 200, 30);
 		panel.add(cb_find_type);
@@ -123,6 +172,10 @@ public class Food_Management extends JPanel{
 			public void mouseExited(MouseEvent e) {
 				lb_filter.setBackground(new Color(255, 134, 89));
 			}
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				filterFood();
+			}
 		});
 		lb_filter.setForeground(Color.WHITE);
 		lb_filter.setBackground(new Color(255, 143, 89));
@@ -133,7 +186,7 @@ public class Food_Management extends JPanel{
 		panel.add(lb_filter);
 		
 		tf_id = new JTextField();
-		tf_id.setEnabled(false);
+		tf_id.setEditable(false);
 		tf_id.setFont(new Font("Tahoma", Font.PLAIN, 25));
 		tf_id.setBounds(280, 103, 250, 43);
 		add(tf_id);
@@ -145,7 +198,7 @@ public class Food_Management extends JPanel{
 		add(lblTnSnPhm);
 		
 		tf_name = new JTextField();
-		tf_name.setEnabled(false);
+		tf_name.setEditable(false);
 		tf_name.setFont(new Font("Tahoma", Font.PLAIN, 25));
 		tf_name.setColumns(10);
 		tf_name.setBounds(280, 169, 250, 43);
@@ -163,7 +216,7 @@ public class Food_Management extends JPanel{
 		add(lblnGi);
 		
 		tf_price = new JTextField();
-		tf_price.setEnabled(false);
+		tf_price.setEditable(false);
 		tf_price.setFont(new Font("Tahoma", Font.PLAIN, 25));
 		tf_price.setColumns(10);
 		tf_price.setBounds(280, 308, 250, 43);
@@ -171,19 +224,19 @@ public class Food_Management extends JPanel{
 		
 		cb_type = new JComboBox();
 		cb_type.setEnabled(false);
+		cb_type.setEditable(true);
 		cb_type.setForeground(new Color(54, 54, 54));
 		cb_type.setFont(new Font("Tahoma", Font.PLAIN, 25));
-		cb_type.setModel(new DefaultComboBoxModel(new String[] {"Nước"}));
+		cb_type.setModel(new DefaultComboBoxModel(new String[] {"Burger", "Pizza"}));
 		cb_type.setBounds(280, 238, 250, 43);
 		add(cb_type);
 		
-		tf_image = new JLabel("");
-		tf_image.setIcon(new ImageIcon(Food_Management.class.getResource("/images/buger_thantre.jpg")));
-		tf_image.setHorizontalAlignment(SwingConstants.CENTER);
-		tf_image.setBounds(605, 120, 210, 180);
-		add(tf_image);
+		lb_image = new JLabel("");
+		lb_image.setHorizontalAlignment(SwingConstants.CENTER);
+		lb_image.setBounds(600, 115, 220, 190);
+		add(lb_image);
 		
-		JLabel image_icon = new JLabel("");
+		image_icon = new JLabel("");
 		image_icon.setHorizontalAlignment(SwingConstants.CENTER);
 		image_icon.setIcon(new ImageIcon(Food_Management.class.getResource("/images/icon_image.png")));
 		image_icon.setBounds(585, 100, 250, 220);
@@ -230,10 +283,10 @@ public class Food_Management extends JPanel{
 			}
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				tf_id.setEnabled(true);
-				tf_name.setEnabled(true);
+//				tf_id.setEnabled(true);
+				tf_name.setEditable(true);
 				cb_type.setEnabled(true);
-				tf_price.setEnabled(true);
+				tf_price.setEditable(true);
 				bt_camera.setVisible(true);
 				bt_save.setVisible(true);
 			}
@@ -256,6 +309,12 @@ public class Food_Management extends JPanel{
 			public void mouseExited(MouseEvent e) {
 				lb_delete.setBackground(new Color(255, 85, 111));
 			}
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				deleteFood();
+				table_model.setRowCount(0);
+				loadFood();
+			}
 		});
 		lb_delete.setForeground(Color.WHITE);
 		lb_delete.setOpaque(true);
@@ -266,6 +325,12 @@ public class Food_Management extends JPanel{
 		add(lb_delete);
 		
 		bt_camera = new JButton("");
+		bt_camera.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				image = En_Image.imageToBytes(panel, lb_image);
+            }
+		});
 		bt_camera.setFocusPainted(false);
 		bt_camera.setBackground(new Color(245, 241, 226));
 		bt_camera.setIcon(new ImageIcon(Food_Management.class.getResource("/images/camera.png")));
@@ -276,10 +341,21 @@ public class Food_Management extends JPanel{
 		bt_save = new JButton("Lưu");
 		bt_save.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				tf_id.setEnabled(false);
-				tf_name.setEnabled(false);
+				int selectedRow = table.getSelectedRow();
+				ArrayList<Model_Food> list = data_food.getInstance().loadFood();
+				for(Model_Food model_food : list) {
+					if(tf_id.getText().equals(model_food.getFood_id()) && !tf_id.getText().equals(table.getValueAt(selectedRow, 0).toString())) {
+						JOptionPane.showMessageDialog(null, "Mã món ăn đã tồn tại vui lòng nhập lại!");
+						return;
+					}
+				}
+
+				editFood();
+				reset();
+				tf_id.setEditable(false);
+				tf_name.setEditable(false);
 				cb_type.setEnabled(false);
-				tf_price.setEnabled(false);
+				tf_price.setEditable(false);
 				bt_camera.setVisible(false);
 				bt_save.setVisible(false);
 			}
@@ -291,11 +367,88 @@ public class Food_Management extends JPanel{
 		bt_save.setBounds(899, 319, 200, 43);
 		add(bt_save);
 		bt_save.setVisible(false);
+		
+		reset();
 	}
 	
-	public void loadFood() {
+	public static void loadFood() {
 		ArrayList<Model_Food> list = data_food.getInstance().loadFood();
-		
-		
+		table_model.setRowCount(0);
+		for(Model_Food model_food : list) {
+			Object[] rowData = {model_food.getFood_id(), model_food.getFood_name(), model_food.getFood_type(), model_food.getFood_price(), model_food.getFood_image()};
+			table_model.addRow(rowData);
+		}
+	}
+	
+	public static void addFood(Model_Food model_food) {
+		Object[] newRow = {model_food.getFood_id(), model_food.getFood_name(), model_food.getFood_type(), model_food.getFood_price()};
+        table_model.addRow(newRow);
+        loadFood();
+	}
+	
+	public void deleteFood() {
+		int selectRow = table.getSelectedRow();
+		if(selectRow >= 0) {
+			String food_id = table.getValueAt(selectRow, 0).toString();
+			table_model.removeRow(selectRow);
+			Data_Food data_food = new Data_Food();
+			data_food.deleteFood(food_id);
+		}
+	}
+	
+	public void editFood() {
+		int selectRow = table.getSelectedRow();
+		if(selectRow >= 0) {
+			String food_id = tf_id.getText();
+			String food_name = tf_name.getText();
+			String food_type = cb_type.getSelectedItem().toString();
+			int food_price = Integer.parseInt(tf_price.getText());
+			byte[] food_image = null;
+			
+			Model_Food model_food = new Model_Food(food_id, food_name, food_type, food_price, food_image);
+			Data_Food.getInstance().updateFood(model_food);
+			
+			table_model.setValueAt(food_id, selectRow, 0);  
+            table_model.setValueAt(food_name, selectRow, 1); 
+            table_model.setValueAt(food_type, selectRow, 2); 
+            table_model.setValueAt(food_price, selectRow, 3); 
+		}
+	}
+	
+	public void searchFood() {
+		String searchname = tf_find_name.getText();
+		if(searchname.isEmpty() || searchname.equals("Nhập tên món ăn...")) {
+			loadFood();
+		} else {
+			ArrayList<Model_Food> list = Data_Food.getInstance().searchFood("%" + searchname + "%");
+			table_model.setRowCount(0);
+			for(Model_Food model_food : list) {
+				Object[] rowData = {model_food.getFood_id(), model_food.getFood_name(), model_food.getFood_type(), model_food.getFood_price()};
+				table_model.addRow(rowData);
+			}
+		}
+		reset();
+	}
+	
+	public void filterFood() {
+		String condition = "1=1";
+		if(!cb_find_type.getSelectedItem().toString().equals("Tất cả")) {
+			condition += "AND Food_Type='" + cb_find_type.getSelectedItem().toString() + "'";
+		}
+		ArrayList<Model_Food> list = Data_Food.getInstance().filterFood(condition);
+		table_model.setRowCount(0);
+		for(Model_Food model_food : list) {
+			Object[] rowData = {model_food.getFood_id(), model_food.getFood_name(), model_food.getFood_type(), model_food.getFood_price()};
+			table_model.addRow(rowData);
+		}
+		reset();
+	}
+	
+	public void reset() {
+		tf_id.setText("");
+		tf_name.setText("");
+		cb_type.setSelectedIndex(0);
+		tf_price.setText("");
+		lb_image.setIcon(null);
 	}
 }
