@@ -156,7 +156,7 @@ public class Add_Food extends JPanel{
 		cb_type = new JComboBox();
 		cb_type.setForeground(new Color(39, 39, 39));
 		cb_type.setFont(new Font("Tahoma", Font.PLAIN, 20));
-		cb_type.setModel(new DefaultComboBoxModel(new String[] {"Burger"}));
+		cb_type.setModel(new DefaultComboBoxModel(new String[] {"Burger", "Gà", "Pizza", "Cơm", "Ăn Kèm", "Drinks"}));
 		cb_type.setBounds(259, 245, 353, 40);
 		add(cb_type);
 		

@@ -37,14 +37,14 @@ public class Body extends JPanel{
 //		store = new Store_Management();
 //		add(store);
 //		
-//		sell = new Sell_Management();
-//		add(sell);
+		sell = new Sell_Management();
+		add(sell);
 //		
 //		employee = new Employee_Management();
 //		add(employee);
 		
-		food = new Food_Management();
-		add(food);
+//		food = new Food_Management();
+//		add(food);
 		
 //		customer = new Customer_Management();
 //		add(customer);

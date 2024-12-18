@@ -157,7 +157,7 @@ public class Food_Management extends JPanel{
 		panel.add(lblNewLabel_2_1);
 		
 		cb_find_type = new JComboBox();
-		cb_find_type.setModel(new DefaultComboBoxModel(new String[] {"Tất cả", "Burger", "Pizza"}));
+		cb_find_type.setModel(new DefaultComboBoxModel(new String[] {"Tất cả", "Burger", "Gà", "Pizza", "Cơm", "Ăn Kèm", "Drinks"}));
 		cb_find_type.setFont(new Font("Tahoma", Font.PLAIN, 20));
 		cb_find_type.setBounds(671, 20, 200, 30);
 		panel.add(cb_find_type);
@@ -224,10 +224,9 @@ public class Food_Management extends JPanel{
 		
 		cb_type = new JComboBox();
 		cb_type.setEnabled(false);
-		cb_type.setEditable(true);
 		cb_type.setForeground(new Color(54, 54, 54));
 		cb_type.setFont(new Font("Tahoma", Font.PLAIN, 25));
-		cb_type.setModel(new DefaultComboBoxModel(new String[] {"Burger", "Pizza"}));
+		cb_type.setModel(new DefaultComboBoxModel(new String[] {"Burger", "Gà", "Pizza", "Cơm", "Ăn Kèm", "Drinks"}));
 		cb_type.setBounds(280, 238, 250, 43);
 		add(cb_type);
 		
@@ -403,9 +402,9 @@ public class Food_Management extends JPanel{
 			String food_name = tf_name.getText();
 			String food_type = cb_type.getSelectedItem().toString();
 			int food_price = Integer.parseInt(tf_price.getText());
-			byte[] food_image = null;
+			image = En_Image.convertLabelImageToBytes(lb_image);
 			
-			Model_Food model_food = new Model_Food(food_id, food_name, food_type, food_price, food_image);
+			Model_Food model_food = new Model_Food(food_id, food_name, food_type, food_price, image);
 			Data_Food.getInstance().updateFood(model_food);
 			
 			table_model.setValueAt(food_id, selectRow, 0);  

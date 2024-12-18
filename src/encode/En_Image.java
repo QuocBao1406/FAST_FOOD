@@ -84,4 +84,28 @@ public class En_Image {
 			}
 		}
 	}
+	
+	public static byte[] convertLabelImageToBytes(JLabel label) {
+        try {
+            // Lấy ImageIcon từ JLabel
+            ImageIcon icon = (ImageIcon) label.getIcon();
+            if (icon != null) {
+                // Chuyển ImageIcon thành BufferedImage
+                BufferedImage bufferedImage = new BufferedImage(
+                        icon.getIconWidth(),
+                        icon.getIconHeight(),
+                        BufferedImage.TYPE_INT_ARGB
+                );
+                bufferedImage.getGraphics().drawImage(icon.getImage(), 0, 0, null);
+
+                // Sử dụng ByteArrayOutputStream để chuyển BufferedImage thành byte[]
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                ImageIO.write(bufferedImage, "png", byteArrayOutputStream); // Định dạng ảnh là PNG
+                return byteArrayOutputStream.toByteArray();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null; // Trả về null nếu xảy ra lỗi
+    }
 }
